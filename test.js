@@ -8,7 +8,7 @@
   function Inquirer(self, arguments) {
     this.element = self;
     this.methods = _methods.bind(this)();
-    var method = arguments[0];
+    var method = arguments[0] || 'init';
 
     _checkDataArray();
 
@@ -29,7 +29,7 @@
         self._bindEvents();
       },
       remove: function() {
-        $(self.element).html('');
+        $(self.element).empty();
       },
       update: function(objectId) {
         self.methods.remove();
@@ -39,8 +39,7 @@
   }
 
   Inquirer.prototype._bindEvents = function() {
-    var self = this;
-    $(this.element).find('#questions-block').on('click', this.questionProvider());
+    $(this.element).find('#questions-block li').on('click', this.questionProvider());
   };
 
   Inquirer.prototype.getCurrentObject = function(objectId) {
@@ -50,6 +49,11 @@
   };
 
   Inquirer.prototype.htmlRepresentation = function(object) {
+
+    if(object.answers === 'undefined') {
+      return '<div id="conclusion">' + object.title + '</div>';
+    }
+
     var html = '';
 
     html = html + '<div id="question">' + object.title + '</div>';
@@ -59,7 +63,6 @@
     }, '');
 
     html = html + '<ul id="questions-block">' + questions + '</ul>';
-    html = html + '<button>' + 'back' + '</button>';
 
     return html;
   };
@@ -78,4 +81,4 @@
   });
 })(jQuery);
 
-$('#wrapper').inquirer('init');
+$('#wrapper').inquirer();
