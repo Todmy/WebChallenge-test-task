@@ -23,7 +23,7 @@
     var self = this;
     return {
       init: function(objectId) {
-        objectId = objectId || '0001';
+        objectId = objectId || '0000';
         var resultHtml = self.htmlRepresentation(self.getCurrentObject(objectId));
         self.element.append(resultHtml);
         self._bindEvents();
