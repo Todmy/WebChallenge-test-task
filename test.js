@@ -1,68 +1,81 @@
 (function($) {
-  function checkDataArray() {
-    if(typeof dataArray !== 'object' || !dataArray.length) {
+  function _checkDataArray() {
+    if (typeof dataArray !== 'object' || !dataArray.length) {
       throw new Error('Array of questions is missing!!!');
     }
   }
 
-  methods = {
-    init: function() {
-      htmlRepresentation.call(this, dataArray[0]);
-      //this.append(resultHtml);
-    },
-    remove: function() {
-      this.html('');
-    },
-    update: function() {
-      methods.remove.apply(this, arguments);
-      methods.init.apply(this, arguments);
-    }
-  };
-
-  function htmlRepresentation(object) {
-    var html = '';
-
-    //console.log(this);
-    html = html + '<div id="question">' + object.title + '</div>';
-    html = html + '<ul id="questions-block"></ul>';
-
-    $(this).append(html);
-    _.each(object.answers, function(element) {
-      $(this).find('#questions-block').append('<li>' + element.answer + '</li>').on('click', function() {
-        console.log(element.answer);
-      })
-    }, this);
-    $(this).append('<button>' + 'back' + '</button>');
-  }
-
-  $.fn.inquirer = function Inquired() {
-
-    checkDataArray();
-
+  function Inquirer(self, arguments) {
+    this.element = self;
+    this.methods = _methods.bind(this)();
     var method = arguments[0];
 
-    if (methods[method]) {
-      method = methods[method];
-      arguments = Array.prototype.slice.call(arguments, 1);
+    _checkDataArray();
+
+    if (this.methods[method]) {
+      this.methods[method]();
     } else {
       throw new Error('Wrong method!!!');
     }
-
-    return method.apply(this, arguments);
-  };
-
-  function parse() {
-
   }
 
+  function _methods() {
+    var self = this;
+    return {
+      init: function(objectId) {
+        objectId = objectId || '0001';
+        var resultHtml = self.htmlRepresentation(self.getCurrentObject(objectId));
+        self.element.append(resultHtml);
+        self._bindEvents();
+      },
+      remove: function() {
+        $(self.element).html('');
+      },
+      update: function(objectId) {
+        self.methods.remove();
+        self.methods.init(objectId);
+      }
+    }
+  }
 
+  Inquirer.prototype._bindEvents = function() {
+    var self = this;
+    $(this.element).find('#questions-block').on('click', this.questionProvider());
+  };
 
+  Inquirer.prototype.getCurrentObject = function(objectId) {
+    return _.find(dataArray, function(element) {
+      return element.id === objectId;
+    })
+  };
+
+  Inquirer.prototype.htmlRepresentation = function(object) {
+    var html = '';
+
+    html = html + '<div id="question">' + object.title + '</div>';
+
+    var questions = _.reduce(object.answers, function(memo, element) {
+      return memo + '<li data-link="' + element.link + '">' + element.answer + '</li>';
+    }, '');
+
+    html = html + '<ul id="questions-block">' + questions + '</ul>';
+    html = html + '<button>' + 'back' + '</button>';
+
+    return html;
+  };
+
+  Inquirer.prototype.questionProvider = function() {
+    var self = this;
+    return function(event) {
+      self.methods.update($(event.target).data('link'));
+    }
+  };
+
+  $.fn.extend({
+    inquirer: function() {
+      return new Inquirer(this, arguments);
+    }
+  });
 })(jQuery);
 
-$('#wrapper').inquirer('init', '1111');
-//setTimeout(function() {
-//  $('#wrapper').inquirer('remove');
-//}, 1000);
-//setTimeout(function() {
-//  $('#wrapper').inquirer('update');
-//}, 5000);
+$('#wrapper').inquirer('init');
