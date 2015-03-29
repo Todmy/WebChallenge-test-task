@@ -1,4 +1,6 @@
 (function($) {
+  var dataArray;
+
   function _checkDataArray() {
     if (typeof dataArray !== 'object' || !dataArray.length) {
       throw new Error('Array of questions is missing!!!');
@@ -8,7 +10,8 @@
   function Inquirer(self, arguments) {
     this.element = self;
     this.methods = _methods.bind(this)();
-    var method = arguments[0] || 'init';
+    dataArray = arguments[0];
+    var method = arguments[1] || 'init';
 
     _checkDataArray();
 
@@ -50,8 +53,8 @@
 
   Inquirer.prototype.htmlRepresentation = function(object) {
 
-    if(object.answers === 'undefined') {
-      return '<div id="conclusion">' + object.title + '</div>';
+    if(object.answers === undefined) {
+      return '<div id="conclusion"><div id="preamble">Мова програмування для вас ... </div><div id="programming-language">' + object.title + '</div></div>';
     }
 
     var html = '';
@@ -81,4 +84,4 @@
   });
 })(jQuery);
 
-$('#wrapper').inquirer();
+$('#inquirer').inquirer(dataArray);
